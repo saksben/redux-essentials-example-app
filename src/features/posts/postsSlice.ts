@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { client } from '@/api/client'
 
 import type { RootState } from '@/app/store'
@@ -113,6 +113,11 @@ export default postsSlice.reducer
 export const selectAllPosts = (state: RootState) => state.posts.posts
 
 export const selectPostById = (state: RootState, postId: string) => state.posts.posts.find((post) => post.id === postId)
+
+export const selectPostsByUser = createSelector(
+  [selectAllPosts, (state: RootState, userId: string) => userId],
+  (posts, userId) => posts.filter((post) => post.user === userId),
+)
 
 export const addPostsListeners = (startListening: AppStartListening) => {
   startListening({
