@@ -2,21 +2,32 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { UserIcon } from './UserIcon'
 import { userLoggedOut } from '@/features/auth/authSlice'
-import { fetchNotifications, selectAllNotifications } from '@/features/notifications/notificationsSlice'
+import {
+  fetchNotificationsWebsocket,
+  selectNotificationsMetadata,
+  useGetNotificationsQuery,
+} from '@/features/notifications/notificationsSlice'
 import { selectUserById } from '@/features/users/usersSlice'
+
+import { UserIcon } from './UserIcon'
 
 export const Navbar = () => {
   const dispatch = useAppDispatch()
   const username = useAppSelector((state) => state.auth.username)!
   const user = useAppSelector((state) => selectUserById(state, username))
 
-  const notifications = useAppSelector(selectAllNotifications)
-  const numUnreadNotifications = notifications.filter((n) => !n.read).length
+  // Trigger initial fetch of notifications and keep the websocket open to receive updates
+  useGetNotificationsQuery()
+
+  const notificationsMetadata = useAppSelector(selectNotificationsMetadata)
+  const numUnreadNotifications = notificationsMetadata.filter((n) => !n.read).length
+
+  const fetchNewNotifications = () => {
+    dispatch(fetchNotificationsWebsocket())
+  }
 
   const isLoggedIn = !!username && !!user
-
   let navContent: React.ReactNode = null
 
   if (isLoggedIn) {
@@ -25,7 +36,7 @@ export const Navbar = () => {
     }
 
     const fetchNewNotifications = () => {
-      dispatch(fetchNotifications())
+      dispatch(fetchNotificationsWebsocket())
     }
 
     let unreadNotificationsBadge: React.ReactNode | undefined
