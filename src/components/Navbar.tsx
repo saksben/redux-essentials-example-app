@@ -5,11 +5,12 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { UserIcon } from './UserIcon'
 import { userLoggedOut } from '@/features/auth/authSlice'
 import { fetchNotifications, selectAllNotifications } from '@/features/notifications/notificationsSlice'
+import { selectUserById } from '@/features/users/usersSlice'
 
 export const Navbar = () => {
   const dispatch = useAppDispatch()
-  const username = useAppSelector((state) => state.auth.username)
-  const user = useAppSelector((state) => state.users.find((user) => user.id === username))
+  const username = useAppSelector((state) => state.auth.username)!
+  const user = useAppSelector((state) => selectUserById(state, username))
 
   const notifications = useAppSelector(selectAllNotifications)
   const numUnreadNotifications = notifications.filter((n) => !n.read).length

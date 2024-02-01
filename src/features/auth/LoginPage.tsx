@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { userLoggedIn } from './authSlice'
 import { useNavigate } from 'react-router-dom'
+
+import { selectAllUsers } from '@/features/users/usersSlice'
+import { userLoggedIn } from './authSlice'
 
 export const LoginPage = () => {
   const dispatch = useAppDispatch()
-  const users = useAppSelector((state) => state.users)
+  const users = useAppSelector(selectAllUsers)
   const navigate = useNavigate()
 
   const [userId, setUserId] = useState('')
