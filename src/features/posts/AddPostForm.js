@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { postAdded } from './postsSlice'
+import { addNewPost } from './postsSlice'
 
 // AddPostForm component to add posts
 export const AddPostForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
+  const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
   const dispatch = useDispatch()
   const users = useSelector((state) => state.users)
@@ -15,18 +16,27 @@ export const AddPostForm = () => {
   const onContentChanged = (e) => setContent(e.target.value)
   const onAuthorChanged = (e) => setUserId(e.target.value)
 
-  // When save button clicked and there is title and content data, dispatch the action of type posts/postAdded and pass in a new post object containing the post title, content, and user
-  const onSavePostClicked = () => {
-    if (title && content) {
-      dispatch(postAdded(title, content, userId))
-      // Reset the form
-      setTitle('')
-      setContent('')
+  // Can only save post if there is a title, content, and userId
+  const canSave =
+    [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+
+  // When save button clicked and there is title, content, and userId data and addRequestStatus is idle, dispatch the action of type posts/addNewPost and pass in a new post object containing the post title, content, and user
+  const onSavePostClicked = async () => {
+    if (canSave) {
+      try {
+        setAddRequestStatus('pending')
+        await dispatch(addNewPost({ title, content, user: userId })).unwrap()
+        // Reset the form
+        setTitle('')
+        setContent('')
+        setUserId('')
+      } catch (err) {
+        console.error('Failed to save the post: ', err)
+      } finally {
+        setAddRequestStatus('idle')
+      }
     }
   }
-
-  // Can only save post if there is a title, content, and userId
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
 
   // Give an option from the select that maps each user in {store} to an option
   const usersOptions = users.map((user) => (

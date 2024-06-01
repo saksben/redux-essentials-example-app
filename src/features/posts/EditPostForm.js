@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
-import { postUpdated } from './postsSlice'
+import { postUpdated, selectPostById } from './postsSlice'
 
 // EditPostForm component to edit posts
 export const EditPostForm = ({ match }) => {
@@ -10,7 +10,7 @@ export const EditPostForm = ({ match }) => {
 
 //   Find the specific post by id
   const post = useSelector((state) =>
-    state.posts.find((post) => post.id === postId),
+    selectPostById(state, postId),
   )
 
   const [title, setTitle] = useState(post.title)
