@@ -1,5 +1,5 @@
 import React from "react";
-import { parseISO, formatDistanceToNow, parse } from "date-fns";
+import { parseISO, formatDistanceToNow } from "date-fns";
 
 // TimeAgo component to show how much time has passed since post was created
 export const TimeAgo = ({timestamp}) => {
