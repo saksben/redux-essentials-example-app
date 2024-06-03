@@ -1,31 +1,25 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from './TimeAgo'
 import { ReactionButtons } from './ReactionButtons'
-import { selectPostById } from './postsSlice'
+import { Spinner } from '../../components/Spinner'
+import { useGetPostQuery } from '../api/apiSlice'
 
 // SinglePostPage component, where you can view page of a single post
 export const SinglePostPage = ({ match }) => {
   const { postId } = match.params
 
   //   Find specific post from postId passed from {match} prop
-  const post = useSelector((state) =>
-    selectPostById(state, postId),
-  )
+  const { data: post, isFetching, isSuccess } = useGetPostQuery(postId)
 
-  //   Error handling if not found
-  if (!post) {
-    return (
-      <section>
-        <h2>Post not found!</h2>
-      </section>
-    )
-  }
+  let content
 
-  return (
-    <section>
+  //   Make spinner while fetching, else render post
+  if (isFetching) {
+    content = <Spinner text="Loading..." />
+  } else if (isSuccess) {
+    content = (
       <article className="post">
         <h2>{post.title}</h2>
         <div>
@@ -38,6 +32,8 @@ export const SinglePostPage = ({ match }) => {
           Edit Post
         </Link>
       </article>
-    </section>
-  )
+    )
+  }
+
+  return <section>{content}</section>
 }

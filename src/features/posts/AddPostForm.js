@@ -1,40 +1,36 @@
 import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { addNewPost } from './postsSlice'
+import { useSelector } from 'react-redux'
 import { selectAllUsers } from '../users/usersSlice'
+import { useAddNewPostMutation } from '../api/apiSlice'
+import { Spinner } from '../../components/Spinner'
 
 // AddPostForm component to add posts
 export const AddPostForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
-  const [addRequestStatus, setAddRequestStatus] = useState('idle')
 
-  const dispatch = useDispatch()
+  const [addNewPost, { isLoading }] = useAddNewPostMutation() // To update the server and add a new post endpoint
   const users = useSelector(selectAllUsers)
 
   const onTitleChanged = (e) => setTitle(e.target.value)
   const onContentChanged = (e) => setContent(e.target.value)
   const onAuthorChanged = (e) => setUserId(e.target.value)
 
-  // Can only save post if there is a title, content, and userId
-  const canSave =
-    [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+  // Can only save post if there is a title, content, and userId, and it is not loading
+  const canSave = [title, content, userId].every(Boolean) && !isLoading
 
   // When save button clicked and there is title, content, and userId data and addRequestStatus is idle, dispatch the action of type posts/addNewPost and pass in a new post object containing the post title, content, and user
   const onSavePostClicked = async () => {
     if (canSave) {
       try {
-        setAddRequestStatus('pending')
-        await dispatch(addNewPost({ title, content, user: userId })).unwrap()
+        await addNewPost({ title, content, user: userId }).unwrap()
         // Reset the form
         setTitle('')
         setContent('')
         setUserId('')
       } catch (err) {
         console.error('Failed to save the post: ', err)
-      } finally {
-        setAddRequestStatus('idle')
       }
     }
   }
@@ -45,6 +41,9 @@ export const AddPostForm = () => {
       {user.name}
     </option>
   ))
+
+  // Spinner while it is loading
+  const spinner = isLoading ? <Spinner size="30px" /> : null
 
   return (
     <section>
@@ -70,9 +69,12 @@ export const AddPostForm = () => {
           value={content}
           onChange={onContentChanged}
         />
-        <button type="button" onClick={onSavePostClicked} disabled={!canSave}>
-          Save Post
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button type="button" onClick={onSavePostClicked} disabled={!canSave}>
+            Save Post
+          </button>
+          {spinner}
+        </div>
       </form>
     </section>
   )
