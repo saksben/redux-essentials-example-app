@@ -1,3 +1,5 @@
+// Unnecessary file since Redux Essentials tutorial RTK Query Advanced Patterns
+
 import {
   createSlice,
   createAsyncThunk,

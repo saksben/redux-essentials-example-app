@@ -1,6 +1,7 @@
+// TODO: For some reason, the reactions aren't incrementing on individual post, but can be seen on main page whether added from main page or individual post
+
 import React from 'react'
-import { useDispatch } from 'react-redux'
-import { reactionAdded } from './postsSlice'
+import { useAddReactionMutation } from '../api/apiSlice'
 
 const reactionEmoji = {
   thumbsUp: '👍',
@@ -12,21 +13,23 @@ const reactionEmoji = {
 
 // ReactionButtons component to show reaction emojis
 export const ReactionButtons = ({ post }) => {
-  const dispatch = useDispatch()
+  const [addReaction] = useAddReactionMutation()
 
-  const reactionButtons = Object.entries(reactionEmoji).map(([name, emoji]) => {
-    return (
-      <button
-        key={name}
-        type="button"
-        className="muted-button reaction-button"
-        onClick={() =>
-          dispatch(reactionAdded({ postId: post.id, reaction: name }))
-        }
-      >
-        {emoji} {post.reactions[name]}
-      </button>
-    )
-  })
+  const reactionButtons = Object.entries(reactionEmoji).map(
+    ([reactionName, emoji]) => {
+      return (
+        <button
+          key={reactionName}
+          type="button"
+          className="muted-button reaction-button"
+          onClick={() =>
+            addReaction({ postId: post.id, reaction: reactionName })
+          }
+        >
+          {emoji} {post.reactions[reactionName]}
+        </button>
+      )
+    },
+  )
   return <div>{reactionButtons}</div>
 }

@@ -1,35 +1,36 @@
 import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
-import { postUpdated, selectPostById } from './postsSlice'
+import { Spinner } from '../../components/Spinner'
+import { useGetPostQuery, useEditPostMutation } from '../api/apiSlice'
 
 // EditPostForm component to edit posts
 export const EditPostForm = ({ match }) => {
   const { postId } = match.params
 
-//   Find the specific post by id
-  const post = useSelector((state) =>
-    selectPostById(state, postId),
-  )
+  //   Find the specific post by id
+  const { data: post } = useGetPostQuery(postId)
+
+  const [updatePost, { isLoading }] = useEditPostMutation()
 
   const [title, setTitle] = useState(post.title)
   const [content, setContent] = useState(post.content)
 
-  const dispatch = useDispatch()
   const history = useHistory()
 
   const onTitleChanged = (e) => setTitle(e.target.value)
   const onContentChanged = (e) => setContent(e.target.value)
 
   //   When Save button clicked and there is title and content data, dispatch the action of type posts/postUpdated with the updated title and content, and push post's url to history
-  const onSavePostClicked = () => {
+  const onSavePostClicked = async () => {
     if (title && content) {
-      dispatch(postUpdated({ id: postId, title, content }))
+      await updatePost({ id: postId, title, content })
       history.push(`/posts/${postId}`)
     }
   }
-  
+
+  const spinner = isLoading ? <Spinner text="Saving..." /> : null
+
   return (
     <section>
       <h2>Edit Post</h2>
@@ -54,6 +55,7 @@ export const EditPostForm = ({ match }) => {
       <button type="button" onClick={onSavePostClicked}>
         Save Post
       </button>
+      {spinner}
     </section>
   )
 }
